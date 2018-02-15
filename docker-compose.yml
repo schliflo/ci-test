@@ -16,6 +16,9 @@ services:
       - app
     links:
       - app
+    networks:
+      - webserver
+      - application
 
   app:
     build: .docker/php
@@ -24,6 +27,8 @@ services:
       - ./site/:/app
     environment:
       - EPF_ENV=dev
+    networks:
+      - application
 
   browser-sync:
     image: ustwo/browser-sync
@@ -40,6 +45,8 @@ services:
     environment:
       - VIRTUAL_HOST=sync.project.docker
       - VIRTUAL_PORT=80
+    networks:
+      - webserver
 
   validator:
     image: validator/validator
@@ -48,3 +55,13 @@ services:
       - web
     links:
       - web
+    networks:
+      - webserver
+
+networks:
+  webserver:
+    external:
+      name: webserver
+  application:
+    external:
+      name: application
