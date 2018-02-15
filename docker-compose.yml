@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  web:
+    image: webdevops/apache:alpine
+    container_name: web
+    volumes:
+      - ./site/:/app
+    environment:
+      - WEB_PHP_SOCKET=app:9000
+      - EPF_ENV=dev
+      - CSS_FORCE_COMPILATION=true
+      - VIRTUAL_HOST=project.docker
+      - VIRTUAL_PORT=80
+    depends_on:
+      - app
+    links:
+      - app
+
+  app:
+    build: .docker/php
+    container_name: app
+    volumes:
+      - ./site/:/app
+    environment:
+      - EPF_ENV=dev
+
+  browser-sync:
+    image: ustwo/browser-sync
+    container_name: browser-sync
+    command: start --config "/source/.docker/browser-sync/config.js"
+    volumes:
+      - ./site/:/source
+    depends_on:
+      - web
+    links:
+      - web
+    expose:
+      - 3000
+    environment:
+      - VIRTUAL_HOST=sync.project.docker
+      - VIRTUAL_PORT=80
+
+  validator:
+    image: validator/validator
+    container_name: validator
+    depends_on:
+      - web
+    links:
+      - web
